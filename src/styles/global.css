@@ -169,3 +169,4 @@ img { max-width:100%; }
 .hero{background:linear-gradient(90deg,#0b1f3aef,#0b1f3ac9),url("../images/library/power-spray-1.jpg") center/cover}.hero-inner{max-width:1280px}.hero h1{font-size:clamp(40px,5.4vw,76px)}.section-title{text-transform:uppercase}.form-card{border-top:5px solid #f2690d}
 .hero-inner{align-items:start}.form-card{margin-top:12px}.lead-success{padding-bottom:30px}.lead-success[hidden]{display:none}@media(max-width:780px){.form-card{margin-bottom:75px}}
 .hero-inner{align-items:start!important}.hero .form-card{margin-top:12px}.form-card{padding-bottom:86px}.hero-cta a:last-child{color:#fff}.form-card-head a{white-space:nowrap}.hero h1{max-width:680px}
+.hero .crumbs,.hero .crumbs a{color:#c5d9de}.hero .crumbs a:hover{color:white}@media(max-width:780px){.hero-cta{padding-bottom:8px}}
