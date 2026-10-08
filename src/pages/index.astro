@@ -24,7 +24,7 @@ const steps = [
       <div style="margin-top:27px"><a class="text-link" href={u('/guides/how-hydro-jetting-works/')}>See how hydro jetting works<span aria-hidden="true">&#8599;</span></a></div>
     </div>
     <div class="content-list">
-      {services.map((s, i) => <article class="content-item"><div class="item-number">{String(i + 1).padStart(2, '0')}</div><div><h3><a href={u(`/services/${s.slug}/`)} style="color:inherit;text-decoration:none">{s.name}</a></h3><p>{s.blurb}</p></div></article>)}
+      {services.map((s, i) => <a class="content-item" href={u(`/services/${s.slug}/`)} style="color:inherit;text-decoration:none"><div class="item-number">{String(i + 1).padStart(2, '0')}</div><div><h3>{s.name}</h3><p>{s.blurb}</p></div></a>)}
     </div>
   </div></section>
   <section class="content-section" style="background:#f1f5f9"><div class="content-inner split-section">
