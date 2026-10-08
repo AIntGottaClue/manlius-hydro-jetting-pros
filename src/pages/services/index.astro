@@ -11,7 +11,7 @@ const description = 'Hydro jetting for grease, roots, recurring clogs, mineral b
   <Hero headline="Hydro Jetting Services in Manlius, NY" intro="Each service page covers a different kind of blockage and when a closer look at the pipe matters." location="Services" crumbs={[{ href: '/services/', label: 'Services' }]} />
   <section class="content-section"><div class="content-inner">
     <div class="content-list">
-      {services.map((s, i) => <article class="content-item"><div class="item-number">{String(i + 1).padStart(2, '0')}</div><div><h3><a href={u(`/services/${s.slug}/`)} style="color:inherit">{s.name}</a></h3><p>{s.blurb}</p></div></article>)}
+      {services.map((s, i) => <a class="content-item" href={u(`/services/${s.slug}/`)} style="color:inherit;text-decoration:none"><div class="item-number">{String(i + 1).padStart(2, '0')}</div><div><h3>{s.name}</h3><p>{s.blurb}</p></div></a>)}
     </div>
   </div></section>
   <Callout />
