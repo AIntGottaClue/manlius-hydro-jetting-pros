@@ -1,0 +1,92 @@
+name: Publish preview-only fixes
+on:
+  push:
+    branches: [preview-fixes]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: preview-fixes-pages
+  cancel-in-progress: false
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/preview-fixes'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: preview-fixes
+          fetch-depth: 0
+      - name: Apply audited preview source patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/preview-fixes.patch <<'PATCH'
+          diff --git a/src/components/Hero.astro b/src/components/Hero.astro
+          index d17479d..bb2fca0 100644
+          --- a/src/components/Hero.astro
+          +++ b/src/components/Hero.astro
+          @@ -18,7 +18,6 @@ const relevantImage = pageImage(headline);
+                 <h1>{headline}</h1>
+                 <p class="hero-copy">{intro}</p><div class="hero-cta"><a href={business.phoneHref}>Call {business.phoneDisplay}</a><a href="#request-service">Request a call</a></div>
+                 {!['Privacy','Terms'].includes(location) && <img src={u(relevantImage.src)} alt={relevantImage.alt} width="1200" height="896" loading="eager" decoding="async" fetchpriority="high" style="display:block;width:100%;max-width:520px;height:clamp(190px,22vw,280px);object-fit:cover;border-radius:4px;margin:24px 0 0" />}
+          -      <p class="image-note">Illustrative image, not a photo of a local job.</p>
+               </div>
+               <RequestForm location={location} />
+             </div>
+          diff --git a/src/pages/index.astro b/src/pages/index.astro
+          index 22cbf8d..f74764b 100644
+          --- a/src/pages/index.astro
+          +++ b/src/pages/index.astro
+          @@ -24,7 +24,7 @@ const steps = [
+                 <div style="margin-top:27px"><a class="text-link" href={u('/guides/how-hydro-jetting-works/')}>See how hydro jetting works<span aria-hidden="true">&#8599;</span></a></div>
+               </div>
+               <div class="content-list">
+          -      {services.map((s, i) => <article class="content-item"><div class="item-number">{String(i + 1).padStart(2, '0')}</div><div><h3><a href={u(`/services/${s.slug}/`)} style="color:inherit;text-decoration:none">{s.name}</a></h3><p>{s.blurb}</p></div></article>)}
+          +      {services.map((s, i) => <a class="content-item" href={u(`/services/${s.slug}/`)} style="color:inherit;text-decoration:none"><div class="item-number">{String(i + 1).padStart(2, '0')}</div><div><h3>{s.name}</h3><p>{s.blurb}</p></div></a>)}
+               </div>
+             </div></section>
+             <section class="content-section" style="background:#f1f5f9"><div class="content-inner split-section">
+          diff --git a/src/pages/services/index.astro b/src/pages/services/index.astro
+          index 97d1778..ddc569b 100644
+          --- a/src/pages/services/index.astro
+          +++ b/src/pages/services/index.astro
+          @@ -11,7 +11,7 @@ const description = 'Hydro jetting for grease, roots, recurring clogs, mineral b
+             <Hero headline="Hydro Jetting Services in Manlius, NY" intro="Each service page covers a different kind of blockage and when a closer look at the pipe matters." location="Services" crumbs={[{ href: '/services/', label: 'Services' }]} />
+             <section class="content-section"><div class="content-inner">
+               <div class="content-list">
+          -      {services.map((s, i) => <article class="content-item"><div class="item-number">{String(i + 1).padStart(2, '0')}</div><div><h3><a href={u(`/services/${s.slug}/`)} style="color:inherit">{s.name}</a></h3><p>{s.blurb}</p></div></article>)}
+          +      {services.map((s, i) => <a class="content-item" href={u(`/services/${s.slug}/`)} style="color:inherit;text-decoration:none"><div class="item-number">{String(i + 1).padStart(2, '0')}</div><div><h3>{s.name}</h3><p>{s.blurb}</p></div></a>)}
+               </div>
+             </div></section>
+             <Callout />
+          PATCH
+          if git apply --check /tmp/preview-fixes.patch; then
+            git apply /tmp/preview-fixes.patch
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add src
+            git commit -m 'Remove preview image disclaimers and update service cards'
+            git push origin HEAD:preview-fixes
+          elif git apply --reverse --check /tmp/preview-fixes.patch; then
+            echo 'Preview source patch already applied.'
+          else
+            echo 'Preview patch no longer matches source. Review required.' >&2
+            exit 1
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          BASE: /manlius-hydro-jetting-pros
+          SITE_BASE: /manlius-hydro-jetting-pros
+      - name: Publish only GitHub Pages preview
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          force_orphan: true
